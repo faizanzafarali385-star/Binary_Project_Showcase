@@ -5,6 +5,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import * as THREE from 'three';
+import GradientASCII from './components/GradientASCII';
 
 const R2 = 'https://pub-86dc5b5484314368ac5436a674b0d919.r2.dev/';
 
@@ -814,6 +815,14 @@ void main(){
       if (hintGroup) {
         hintGroup.style.opacity = String(intro);
       }
+
+      // Smooth fade away of the ASCII gradient background as user scrolls down
+      const asciiBg = $('ascii-bg');
+      if (asciiBg) {
+        const asciiA = 1 - span(pp, 0, 0.20);
+        asciiBg.style.opacity = String(asciiA);
+      }
+
       if (rule) {
         rule.style.transform = `scaleX(${ease(span(pp, 0.68, 0.80))})`;
         rule.style.top = '50%';
@@ -999,6 +1008,29 @@ void main(){
     <>
       <div id="track">
         <main className="stage" id="stage">
+          {/* Ambient ASCII Gradient Background (React Bits - fades away on scroll) */}
+          <div
+            id="ascii-bg"
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%',
+              pointerEvents: 'none',
+              zIndex: 0,
+              opacity: 1,
+            }}
+          >
+            <GradientASCII
+              colors={["#2b2c31", "#a1b4d8", "#5b7c90", "#3c4a4a"]}
+              shape="horizon"
+              characters=" =+xX0S8#@"
+              cellSize={18}
+              density={0.8}
+            />
+          </div>
+
           {/* Hero Section Animated Heading */}
           <h1 aria-label="Ideas to Innovation. Projects to Impact.">
             <div className="hl" id="l1" aria-hidden="true">
@@ -1047,12 +1079,14 @@ void main(){
             <div
               className="logo"
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              title="Binary Battle Club Projects"
+              title="Binary Battle — SGSU"
             >
-              <svg viewBox="0 0 22 18">
-                <path d="M11 0l11 18h-6.200L11 9.600 6.200 18H0z" />
+              <svg viewBox="0 0 22 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M9.5 0.8L0 18H5.8L9.5 10.2V0.8Z" fill="currentColor" />
+                <path d="M12.5 0.8V10.2L16.2 18H22L12.5 0.8Z" fill="currentColor" />
+                <rect x="10" y="13.2" width="2" height="4.8" rx="0.5" fill="currentColor" />
               </svg>
-              BBC
+              <span>Binary Battle</span>
             </div>
             <div id="pager">
               <span onClick={() => stepScroll(-1)} role="button" aria-label="Previous stage">
