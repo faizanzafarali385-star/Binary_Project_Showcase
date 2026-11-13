@@ -3,16 +3,16 @@
 :root{--bg:#0a0a0b;--ink:#f4f1ea;--mid:#8d8b86;--line:rgba(244,241,234,.14)}
 *{box-sizing:border-box;margin:0;padding:0}
 html{background:var(--bg);scroll-behavior:smooth}
-body{font-family:'Inter Tight',system-ui,sans-serif;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body{font-family:'Inter Tight',system-ui,sans-serif;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;overflow-x:hidden;overscroll-behavior-y:none}
 #track{height:1050vh}
-.stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:var(--bg)}
-.hl{position:absolute;left:0;right:0;font-weight:400;font-size:clamp(32px,5.2vw,100px);line-height:1;letter-spacing:-.045em;white-space:nowrap;text-align:center;will-change:transform}
-#l1{top:calc(50% - .98em)}
-#l2{top:calc(50% + .03em)}
+.stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:var(--bg);touch-action:pan-y}
+.hl{position:absolute;left:0;right:0;font-weight:400;font-size:clamp(32px,5.2vw,100px);line-height:1;letter-spacing:-.045em;white-space:nowrap;text-align:center;will-change:transform,opacity;pointer-events:none}
+#l1{top:calc(50% - clamp(85px, 9vw, 160px))}
+#l2{top:calc(50% + clamp(50px, 4.5vw, 85px))}
 #l1 span,#l2 span{display:inline-block}
 #l1 span{margin-right:15vw}
 #l2 span{margin-left:15vw}
-#cap{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:22em;max-width:85vw;text-align:center;font-size:clamp(9.5px,.8vw,13px);font-weight:400;line-height:1.55;letter-spacing:.02em;color:var(--ink)}
+#cap{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:22em;max-width:85vw;text-align:center;font-size:clamp(9.5px,.8vw,13px);font-weight:400;line-height:1.55;letter-spacing:.02em;color:var(--ink);pointer-events:none;will-change:transform,opacity}
 #gl{position:absolute;inset:0;width:100%;height:100%;display:block}
 .top{position:absolute;left:32px;right:32px;top:26px;display:flex;align-items:center;justify-content:space-between;pointer-events:none;z-index:30}
 .top{justify-content:flex-start}.acts{margin-left:auto}
@@ -74,14 +74,106 @@ body{font-family:'Inter Tight',system-ui,sans-serif;color:var(--ink);background:
   to{opacity:1;transform:translateX(0)}
 }
 
+@keyframes scrollBounce{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(4px)}
+}
+
+@keyframes scrollDot{
+  0%,100%{transform:translateY(0);opacity:1}
+  60%{transform:translateY(3px);opacity:0.4}
+}
+
+/* ============================================================
+   MOBILE OPTIMIZATIONS  (≤ 760 px)
+   ============================================================ */
 @media (max-width:760px){
-  .top{left:18px;right:18px;top:18px}.bot{left:18px;right:18px;bottom:18px;grid-template-columns:1fr;gap:12px}
-  .bot .mid{display:none}
-  #hint-group{display:none}
+  /* ---- track: shorter scroll journey on mobile ---- */
+  #track{height:900vh}
+
+  /* ---- header / nav ---- */
+  .top{left:16px;right:16px;top:16px;z-index:30}
+  /* hide desktop nav pills, show only logo + hamburger-menu */
+  .acts a:not([href="#menu"]){display:none}
+  .acts a[href="#menu"]{height:36px;padding:0 14px;font-size:11px;border-radius:99px;min-width:60px;justify-content:center;gap:6px}
   #pager{display:none}
-  #showcase-header{left:18px;right:18px;top:70px;flex-direction:column;align-items:flex-start;gap:8px}
-  #showcase-header .sc-right{margin-top:4px}
+
+  /* ---- hero headings: stacked & scaled for narrow screens ---- */
+  .hl{font-size:clamp(28px,8.5vw,56px);letter-spacing:-.03em;white-space:normal;text-align:center}
+  #l1{top:calc(50% - clamp(70px,16vw,100px));left:0;right:0;padding:0 12px}
+  #l2{top:calc(50% + clamp(28px,7vw,50px));left:0;right:0;padding:0 12px}
+  #l1 span{margin-right:0}
+  #l2 span{margin-left:0}
+
+  /* ---- cap: bigger readable font, tight fit ---- */
+  #cap{font-size:clamp(10.5px,3vw,13px);width:88vw;max-width:88vw;line-height:1.6;padding:0 4px}
+
+  /* ---- hint buttons: visible & touch-friendly on mobile ---- */
+  #hint-group{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    top:auto;
+    bottom:calc(env(safe-area-inset-bottom) + 90px);
+    left:50%;
+    transform:translateX(-50%);
+    width:calc(100% - 32px);
+    max-width:340px;
+    pointer-events:auto;
+    z-index:25
+  }
+  #hint,#hint-sub{
+    width:100%;
+    text-align:center;
+    padding:13px 20px;
+    font-size:11.5px;
+    min-height:46px;
+    border-radius:99px
+  }
+
+  /* ---- showcase header ---- */
+  #showcase-header{
+    left:16px;right:16px;top:64px;
+    flex-direction:column;align-items:flex-start;gap:6px
+  }
+  #showcase-header .sc-right{margin-top:6px;width:100%}
+  #showcase-header .sc-filter-btn{width:100%;text-align:center;padding:10px 14px;min-height:40px;border-radius:8px}
+
+  /* ---- footer bar: single-column, safe-area aware ---- */
+  .bot{
+    left:16px;right:16px;
+    bottom:calc(env(safe-area-inset-bottom) + 14px);
+    grid-template-columns:1fr;
+    gap:8px
+  }
+  .bot .mid{display:none}
   .bot .bot-left{max-width:100%}
-  .bot .r{justify-self:start}
-  .bot .bot-copy{text-align:left}
+  .bot .bot-name{font-size:11px}
+  .bot .bot-sub{font-size:10px}
+  .bot .bot-loc{display:none}
+  .bot .r{justify-self:start;font-size:10px}
+  .bot .bot-copy{text-align:left;font-size:9px}
+
+  /* ---- cross & glow decorations: hide on mobile to reduce clutter ---- */
+  #cross,#glow{display:none}
+}
+
+/* ============================================================
+   SMALL MOBILE  (≤ 420 px)
+   ============================================================ */
+@media (max-width:420px){
+  .hl{font-size:clamp(22px,8vw,40px)}
+  #l1{top:calc(50% - 60px)}
+  #l2{top:calc(50% + 24px)}
+  #cap{font-size:10.5px;line-height:1.55}
+}
+
+/* ============================================================
+   TOUCH TARGETS — ensure all interactive elements are ≥ 44 px
+   ============================================================ */
+@media (pointer:coarse){
+  .acts a{min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center}
+  #pager span{width:48px;height:52px}
+  .bot .r{min-height:44px;display:flex;align-items:center}
+  #showcase-header .sc-filter-btn{min-height:44px}
 }

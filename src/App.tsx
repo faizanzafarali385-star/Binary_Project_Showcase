@@ -792,7 +792,8 @@ void main(){
       setScrollProgress(pp);
 
       const rise = 1 - out(span(pp, 0, 0.12));
-      const run = mix(-50, 76, span(pp, 0, 0.56));
+      const run = mix(-50, 76, span(pp, 0, 0.18));
+      const heroTextOpacity = 1 - span(pp, 0.10, 0.18);
       const l1 = $('l1');
       const l2 = $('l2');
       const cap = $('cap');
@@ -800,9 +801,15 @@ void main(){
       const hintGroup = $('hint-group');
       const showcaseHeader = $('showcase-header');
 
-      if (l1) l1.style.transform = `translate3d(${run}vw,${rise * 34}vh,0)`;
-      if (l2) l2.style.transform = `translate3d(${-run}vw,${rise * 34}vh,0)`;
-      const capA = 1 - span(pp, 0.50, 0.55);
+      if (l1) {
+        l1.style.transform = `translate3d(${run}vw,${rise * 34}vh,0)`;
+        l1.style.opacity = String(heroTextOpacity);
+      }
+      if (l2) {
+        l2.style.transform = `translate3d(${-run}vw,${rise * 34}vh,0)`;
+        l2.style.opacity = String(heroTextOpacity);
+      }
+      const capA = 1 - span(pp, 0.02, 0.10);
       if (cap) {
         cap.style.opacity = String(capA);
         cap.style.transform = `translate(-50%,calc(-50% + ${rise * 34}vh))`;
@@ -1074,6 +1081,36 @@ void main(){
             </button>
           </div>
 
+          {/* Mobile-only scroll indicator */}
+          <div
+            id="mob-scroll"
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              bottom: 'calc(env(safe-area-inset-bottom) + 28px)',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '4px',
+              pointerEvents: 'none',
+              zIndex: 22,
+              opacity: scrollProgress > 0.04 ? 0 : 1,
+              transition: 'opacity 0.4s',
+            }}
+            className="sm:hidden"
+          >
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '9px', letterSpacing: '0.12em', color: 'var(--mid)', textTransform: 'uppercase' }}>
+              Scroll to explore
+            </span>
+            <svg width="16" height="20" viewBox="0 0 16 20" fill="none" style={{ animation: 'scrollBounce 1.6s ease-in-out infinite' }}>
+              <rect x="5" y="1" width="6" height="10" rx="3" stroke="var(--mid)" strokeWidth="1.2" />
+              <circle cx="8" cy="4.5" r="1.5" fill="var(--mid)" style={{ animation: 'scrollDot 1.6s ease-in-out infinite' }} />
+              <path d="M4 15l4 4 4-4" stroke="var(--mid)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+
           {/* Header Navigation */}
           <header className="top">
             <div
@@ -1189,45 +1226,46 @@ void main(){
       {/* ========== PROJECT DETAIL MODAL ========== */}
       {activeProject && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#0a0a0b]/90 p-4 md:p-8"
+          className="fixed inset-0 z-50 flex items-end justify-center sm:items-center bg-[#0a0a0b]/90 p-0 sm:p-4 md:p-8"
           onClick={() => setActiveProject(null)}
         >
           <div
-            className="relative flex h-[86vh] w-full max-w-6xl flex-col overflow-hidden border border-[#f4f1ea]/20 bg-[#0a0a0b]"
+            className="relative flex w-full max-w-6xl flex-col overflow-hidden border-t sm:border border-[#f4f1ea]/20 bg-[#0a0a0b]"
+            style={{ height: 'min(92svh, 92vh)', animation: 'modalIn .3s ease-out' }}
             onClick={e => e.stopPropagation()}
-            style={{ animation: 'modalIn .3s ease-out' }}
           >
-            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#f4f1ea]/15 px-5 py-3.5">
-              <div className="flex items-center gap-4">
-                <span className="font-mono text-xs tracking-widest text-[#8d8b86]">
+            {/* Modal header — stacks on mobile */}
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#f4f1ea]/15 px-4 py-3 sm:px-5 sm:py-3.5">
+              <div className="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-4 min-w-0">
+                <span className="font-mono text-[10px] sm:text-xs tracking-widest text-[#8d8b86] truncate">
                   {String(activeProject.number).padStart(2, '0')} — {activeProject.category}
                 </span>
-                <span className="text-sm font-medium tracking-wide text-[#f4f1ea]">
+                <span className="text-sm font-semibold tracking-wide text-[#f4f1ea] truncate">
                   {activeProject.title}
                 </span>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                 {activeProject.fullVideo && (
-                  <div className="flex items-center border border-[#f4f1ea]/25 font-mono text-xs">
+                  <div className="flex items-center border border-[#f4f1ea]/25 font-mono text-[10px] sm:text-xs rounded overflow-hidden">
                     <button
                       onClick={() => setModalTab('video')}
-                      className={`cursor-pointer px-3 py-1 transition-colors ${
+                      className={`cursor-pointer px-2.5 py-1.5 sm:px-3 sm:py-1 transition-colors ${
                         modalTab === 'video'
                           ? 'bg-[#f4f1ea] text-[#0a0a0b]'
                           : 'text-[#8d8b86] hover:text-[#f4f1ea]'
                       }`}
                     >
-                      VIDEO WALKTHROUGH
+                      VIDEO
                     </button>
                     <button
                       onClick={() => setModalTab('live')}
-                      className={`cursor-pointer px-3 py-1 transition-colors ${
+                      className={`cursor-pointer px-2.5 py-1.5 sm:px-3 sm:py-1 transition-colors ${
                         modalTab === 'live'
                           ? 'bg-[#f4f1ea] text-[#0a0a0b]'
                           : 'text-[#8d8b86] hover:text-[#f4f1ea]'
                       }`}
                     >
-                      LIVE SITE PREVIEW
+                      LIVE
                     </button>
                   </div>
                 )}
@@ -1235,26 +1273,27 @@ void main(){
                   href={activeProject.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="border border-[#f4f1ea]/40 px-3.5 py-1 font-mono text-xs tracking-wider text-[#f4f1ea] transition-colors hover:bg-[#f4f1ea] hover:text-[#0a0a0b]"
+                  className="border border-[#f4f1ea]/40 px-3 py-1.5 font-mono text-[10px] sm:text-xs tracking-wider text-[#f4f1ea] transition-colors hover:bg-[#f4f1ea] hover:text-[#0a0a0b] rounded whitespace-nowrap"
                   aria-label={`Open ${activeProject.title} live site in new tab`}
                 >
-                  OPEN LIVE SITE ↗
+                  OPEN ↗
                 </a>
                 <button
                   onClick={() => setActiveProject(null)}
-                  className="cursor-pointer font-mono text-xs tracking-wider text-[#8d8b86] transition-colors hover:text-[#f4f1ea]"
+                  className="cursor-pointer font-mono text-[10px] sm:text-xs tracking-wider text-[#8d8b86] transition-colors hover:text-[#f4f1ea] whitespace-nowrap min-w-[44px] min-h-[44px] flex items-center justify-center"
+                  aria-label="Close modal"
                 >
-                  CLOSE [ESC]
+                  ✕
                 </button>
               </div>
             </div>
             {/* Project description bar */}
-            <div className="border-b border-[#f4f1ea]/8 px-5 py-2.5">
-              <p className="font-mono text-xs leading-relaxed text-[#8d8b86]">
+            <div className="border-b border-[#f4f1ea]/8 px-4 py-2 sm:px-5 sm:py-2.5">
+              <p className="font-mono text-[10px] sm:text-xs leading-relaxed text-[#8d8b86] line-clamp-2 sm:line-clamp-none">
                 {activeProject.description}
               </p>
             </div>
-            <div className="relative flex-1 bg-[#111113]">
+            <div className="relative flex-1 bg-[#111113] overflow-hidden">
               {activeProject.fullVideo && modalTab === 'video' ? (
                 <video
                   src={activeProject.cardVideo || activeProject.fullVideo}
@@ -1285,39 +1324,47 @@ void main(){
           onClick={() => setMenuOpen(false)}
         >
           <div
-            className="flex h-full w-full max-w-xl flex-col justify-between overflow-y-auto border-l border-[#f4f1ea]/15 bg-[#0a0a0b] p-8"
+            className="flex h-full w-full max-w-xl flex-col overflow-hidden border-l border-[#f4f1ea]/15 bg-[#0a0a0b]"
             onClick={e => e.stopPropagation()}
             style={{ animation: 'drawerIn .35s ease-out' }}
           >
-            <div>
-              <div className="mb-6 flex items-center justify-between border-b border-[#f4f1ea]/15 pb-4">
-                <span className="font-mono text-xs tracking-widest text-[#8d8b86]">
-                  OUR PROJECT SHOWCASE — {WORK.length} PROJECTS
-                </span>
-                <button
-                  onClick={() => setMenuOpen(false)}
-                  className="cursor-pointer font-mono text-xs tracking-widest text-[#f4f1ea] hover:opacity-70"
-                >
-                  CLOSE ×
-                </button>
-              </div>
+            {/* Drawer header */}
+            <div className="flex items-center justify-between border-b border-[#f4f1ea]/15 px-5 py-4 flex-shrink-0">
+              <span className="font-mono text-xs tracking-widest text-[#8d8b86]">
+                OUR PROJECT SHOWCASE — {WORK.length} PROJECTS
+              </span>
+              <button
+                onClick={() => setMenuOpen(false)}
+                className="cursor-pointer font-mono text-xs tracking-widest text-[#f4f1ea] hover:opacity-70 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                aria-label="Close menu"
+              >
+                ✕
+              </button>
+            </div>
 
-              {/* Search bar in drawer */}
-              <div className="mb-5">
-                <div className="flex items-center gap-2 border border-[#f4f1ea]/15 px-3 py-2">
+            {/* Scrollable content */}
+            <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-4" style={{ WebkitOverflowScrolling: 'touch' }}>
+              {/* Search bar */}
+              <div className="mb-4">
+                <div className="flex items-center gap-2 border border-[#f4f1ea]/15 px-3 py-2.5 rounded-lg">
                   <span className="font-mono text-xs text-[#8d8b86]">⌕</span>
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
                     placeholder="Search projects..."
-                    className="flex-1 bg-transparent font-mono text-xs tracking-wide text-[#f4f1ea] placeholder-[#8d8b86]/50 outline-none"
+                    className="flex-1 bg-transparent font-mono text-xs tracking-wide text-[#f4f1ea] placeholder-[#8d8b86]/50 outline-none min-h-[36px]"
                     aria-label="Search projects"
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
                   />
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery('')}
-                      className="cursor-pointer font-mono text-xs text-[#8d8b86] hover:text-[#f4f1ea]"
+                      className="cursor-pointer font-mono text-sm text-[#8d8b86] hover:text-[#f4f1ea] min-w-[36px] min-h-[36px] flex items-center justify-center"
+                      aria-label="Clear search"
                     >
                       ×
                     </button>
@@ -1325,13 +1372,13 @@ void main(){
                 </div>
               </div>
 
-              {/* Category filters in drawer */}
-              <div className="mb-5 flex flex-wrap gap-2">
+              {/* Category filters */}
+              <div className="mb-4 flex flex-wrap gap-2">
                 {ALL_CATEGORIES.map(cat => (
                   <button
                     key={cat}
                     onClick={() => setActiveCategory(cat)}
-                    className={`cursor-pointer border px-3 py-1.5 font-mono text-[10px] tracking-wider transition-all duration-200 ${
+                    className={`cursor-pointer border px-3 py-2 font-mono text-[10px] tracking-wider transition-all duration-200 rounded-full min-h-[36px] ${
                       activeCategory === cat
                         ? 'border-[#f4f1ea]/60 bg-[#f4f1ea] text-[#0a0a0b]'
                         : 'border-[#f4f1ea]/15 text-[#8d8b86] hover:border-[#f4f1ea]/40 hover:text-[#f4f1ea]'
@@ -1343,7 +1390,7 @@ void main(){
               </div>
 
               {/* Project count */}
-              <div className="mb-4 font-mono text-xs text-[#8d8b86]">
+              <div className="mb-3 font-mono text-xs text-[#8d8b86]">
                 {filteredProjects.length} of {WORK.length} projects
               </div>
 
@@ -1351,7 +1398,7 @@ void main(){
                 {filteredProjects.map((item) => (
                   <div
                     key={item.title}
-                    className="group flex items-center justify-between py-3.5 transition-colors"
+                    className="group flex items-center justify-between py-4 transition-colors"
                   >
                     <button
                       onClick={() => {
@@ -1359,15 +1406,15 @@ void main(){
                         setModalTab(item.fullVideo ? 'video' : 'live');
                         setActiveProject(item);
                       }}
-                      className="flex cursor-pointer items-baseline gap-4 text-left"
+                      className="flex cursor-pointer items-baseline gap-3 text-left flex-1 min-w-0 pr-3"
                     >
-                      <span className="font-mono text-xs text-[#8d8b86]">
+                      <span className="font-mono text-xs text-[#8d8b86] flex-shrink-0">
                         {String(item.number).padStart(2, '0')}
                       </span>
-                      <span className="text-lg font-normal tracking-tight text-[#f4f1ea] group-hover:underline">
+                      <span className="text-base sm:text-lg font-normal tracking-tight text-[#f4f1ea] group-hover:underline truncate">
                         {item.title}
                       </span>
-                      <span className="font-mono text-[10px] tracking-wider text-[#8d8b86]">
+                      <span className="font-mono text-[9px] sm:text-[10px] tracking-wider text-[#8d8b86] flex-shrink-0 hidden sm:block">
                         {item.categoryTag}
                       </span>
                     </button>
@@ -1375,21 +1422,23 @@ void main(){
                       href={item.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-mono text-xs text-[#8d8b86] transition-colors hover:text-[#f4f1ea]"
+                      className="font-mono text-xs text-[#8d8b86] transition-colors hover:text-[#f4f1ea] flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center"
                       aria-label={`Visit ${item.title} website`}
                     >
-                      VISIT ↗
+                      ↗
                     </a>
                   </div>
                 ))}
                 {filteredProjects.length === 0 && (
-                  <div className="py-8 text-center font-mono text-xs text-[#8d8b86]">
+                  <div className="py-10 text-center font-mono text-xs text-[#8d8b86]">
                     No projects match your search.
                   </div>
                 )}
               </div>
             </div>
-            <div className="mt-8 border-t border-[#f4f1ea]/15 pt-4">
+
+            {/* Drawer footer */}
+            <div className="border-t border-[#f4f1ea]/15 px-5 py-4 flex-shrink-0" style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}>
               <div className="flex items-center justify-between font-mono text-xs text-[#8d8b86]">
                 <span>BINARY BATTLE CLUB · SGSU</span>
                 <button
@@ -1397,12 +1446,12 @@ void main(){
                     toggleShowreel();
                     setMenuOpen(false);
                   }}
-                  className="cursor-pointer text-[#f4f1ea] underline"
+                  className="cursor-pointer text-[#f4f1ea] underline min-h-[36px] flex items-center"
                 >
-                  {showreelMode ? 'SWITCH TO SITE CAPTURES' : 'SWITCH TO SHOWREEL'}
+                  {showreelMode ? 'SITE CAPTURES' : 'SHOWREEL'}
                 </button>
               </div>
-              <div className="mt-3 font-mono text-[10px] leading-relaxed text-[#8d8b86]/60">
+              <div className="mt-2 font-mono text-[10px] leading-relaxed text-[#8d8b86]/60">
                 © 2026 Binary Battle Club. All Rights Reserved.
               </div>
             </div>
@@ -1413,29 +1462,30 @@ void main(){
       {/* ========== ABOUT OVERLAY ========== */}
       {aboutOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#0a0a0b]/88 p-4"
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0a0a0b]/88 p-0 sm:p-4"
           onClick={() => setAboutOpen(false)}
         >
           <div
-            className="w-full max-w-lg border border-[#f4f1ea]/20 bg-[#0a0a0b] p-8"
+            className="w-full max-w-lg border-t sm:border border-[#f4f1ea]/20 bg-[#0a0a0b] px-5 pt-5 pb-6 sm:p-8 overflow-y-auto"
+            style={{ maxHeight: '90svh', animation: 'modalIn .3s ease-out', paddingBottom: 'max(24px, env(safe-area-inset-bottom))' }}
             onClick={e => e.stopPropagation()}
-            style={{ animation: 'modalIn .3s ease-out' }}
           >
-            <div className="mb-6 flex items-center justify-between border-b border-[#f4f1ea]/15 pb-4">
+            <div className="mb-5 flex items-center justify-between border-b border-[#f4f1ea]/15 pb-4">
               <span className="font-mono text-xs tracking-widest text-[#8d8b86]">
                 ABOUT — BINARY BATTLE CLUB
               </span>
               <button
                 onClick={() => setAboutOpen(false)}
-                className="cursor-pointer font-mono text-xs text-[#f4f1ea]"
+                className="cursor-pointer font-mono text-xs text-[#f4f1ea] min-w-[44px] min-h-[44px] flex items-center justify-center"
+                aria-label="Close about"
               >
-                CLOSE ×
+                ✕
               </button>
             </div>
-            <h2 className="mb-5 text-xl font-medium leading-snug tracking-tight text-[#f4f1ea]">
+            <h2 className="mb-4 text-xl font-medium leading-snug tracking-tight text-[#f4f1ea]">
               More Than a Club.<br />A Community of Builders.
             </h2>
-            <div className="space-y-4 text-sm leading-relaxed text-[#8d8b86]">
+            <div className="space-y-3 text-sm leading-relaxed text-[#8d8b86]">
               <p>
                 Binary Battle Club is a student-led coding and AI community at Scope Global Skills University. It brings together curious minds who explore emerging technologies, develop practical skills, collaborate on ideas and build meaningful digital experiences.
               </p>
@@ -1443,20 +1493,20 @@ void main(){
                 Through hands-on learning, experimentation and project development, the community encourages students to move beyond learning technology and start creating with it.
               </p>
             </div>
-            <div className="mt-6 space-y-3 border-t border-[#f4f1ea]/15 pt-5 font-mono text-xs">
-              <div className="flex justify-between">
+            <div className="mt-5 space-y-3 border-t border-[#f4f1ea]/15 pt-4 font-mono text-xs">
+              <div className="flex justify-between gap-4">
                 <span className="text-[#8d8b86]">INSTITUTION</span>
-                <span className="text-[#f4f1ea]">Scope Global Skills University, Bhopal</span>
+                <span className="text-[#f4f1ea] text-right">Scope Global Skills University, Bhopal</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-4">
                 <span className="text-[#8d8b86]">COMMUNITY</span>
                 <span className="text-[#f4f1ea]">Binary Battle Club</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-4">
                 <span className="text-[#8d8b86]">TOTAL PROJECTS</span>
                 <span className="text-[#f4f1ea]">{WORK.length} LIVE DEPLOYMENTS</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-4">
                 <span className="text-[#8d8b86]">TAGLINE</span>
                 <span className="text-[#f4f1ea] text-right" style={{ maxWidth: '60%' }}>Where Student Ideas Become Digital Experiences</span>
               </div>
@@ -1468,48 +1518,49 @@ void main(){
       {/* ========== CONTACT OVERLAY ========== */}
       {contactOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#0a0a0b]/85 p-4"
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#0a0a0b]/85 p-0 sm:p-4"
           onClick={() => setContactOpen(false)}
         >
           <div
-            className="w-full max-w-lg border border-[#f4f1ea]/20 bg-[#0a0a0b] p-8"
+            className="w-full max-w-lg border-t sm:border border-[#f4f1ea]/20 bg-[#0a0a0b] px-5 pt-5 pb-6 sm:p-8 overflow-y-auto"
+            style={{ maxHeight: '90svh', animation: 'modalIn .3s ease-out', paddingBottom: 'max(24px, env(safe-area-inset-bottom))' }}
             onClick={e => e.stopPropagation()}
-            style={{ animation: 'modalIn .3s ease-out' }}
           >
-            <div className="mb-6 flex items-center justify-between border-b border-[#f4f1ea]/15 pb-4">
+            <div className="mb-5 flex items-center justify-between border-b border-[#f4f1ea]/15 pb-4">
               <span className="font-mono text-xs tracking-widest text-[#8d8b86]">
                 SHOWCASE YOUR WORK — BINARY BATTLE CLUB
               </span>
               <button
                 onClick={() => setContactOpen(false)}
-                className="cursor-pointer font-mono text-xs text-[#f4f1ea]"
+                className="cursor-pointer font-mono text-xs text-[#f4f1ea] min-w-[44px] min-h-[44px] flex items-center justify-center"
+                aria-label="Close contact"
               >
-                CLOSE ×
+                ✕
               </button>
             </div>
-            <h2 className="mb-4 text-xl font-medium leading-snug tracking-tight text-[#f4f1ea]">
+            <h2 className="mb-3 text-xl font-medium leading-snug tracking-tight text-[#f4f1ea]">
               Have a Project to Showcase?
             </h2>
-            <p className="mb-6 text-sm leading-relaxed text-[#8d8b86]">
+            <p className="mb-5 text-sm leading-relaxed text-[#8d8b86]">
               Have you created something interesting as part of Binary Battle Club? We believe every idea deserves an opportunity to be seen. Connect with the club to showcase your work and inspire others.
             </p>
-            <div className="space-y-3 border-t border-[#f4f1ea]/15 pt-5 font-mono text-xs">
-              <div className="flex justify-between">
+            <div className="space-y-3 border-t border-[#f4f1ea]/15 pt-4 font-mono text-xs">
+              <div className="flex justify-between gap-4">
                 <span className="text-[#8d8b86]">CLUB PLATFORM</span>
                 <a
                   href="https://binarybattelclub.wasmer.app/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#f4f1ea] underline"
+                  className="text-[#f4f1ea] underline truncate"
                 >
                   binarybattleclub.wasmer.app ↗
                 </a>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-4">
                 <span className="text-[#8d8b86]">TOTAL PROJECTS SHOWCASED</span>
                 <span className="text-[#f4f1ea]">{WORK.length} LIVE DEPLOYMENTS</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-4">
                 <span className="text-[#8d8b86]">INSTITUTION</span>
                 <span className="text-[#f4f1ea]">SGSU, Bhopal</span>
               </div>
@@ -1518,7 +1569,7 @@ void main(){
               href="https://binarybattelclub.wasmer.app/"
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-6 flex items-center justify-center gap-2 border border-[#f4f1ea]/40 px-4 py-2.5 font-mono text-xs tracking-wider text-[#f4f1ea] transition-colors hover:bg-[#f4f1ea] hover:text-[#0a0a0b]"
+              className="mt-5 flex items-center justify-center gap-2 border border-[#f4f1ea]/40 px-4 py-3.5 font-mono text-xs tracking-wider text-[#f4f1ea] transition-colors hover:bg-[#f4f1ea] hover:text-[#0a0a0b] rounded-lg"
             >
               CONNECT WITH BINARY BATTLE CLUB ↗
             </a>
